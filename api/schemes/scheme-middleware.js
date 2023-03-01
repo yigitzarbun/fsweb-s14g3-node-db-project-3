@@ -1,5 +1,5 @@
 const schemeModel = require("./scheme-model");
-
+const db = require("./../../data/db-config");
 /*
   Eğer `scheme_id` veritabanında yoksa:
 
@@ -10,11 +10,14 @@ const schemeModel = require("./scheme-model");
 */
 const checkSchemeId = async (req, res, next) => {
   try {
-    let isExist = await schemeModel.findById(req.params.id);
-    if (!isExist) {
+    const isExist = await schemeModel.findById(req.params.id);
+    //const exist = db("schemes").where("scheme_id", req.params.id).first();
+    if (isExist == null) {
       res
         .status(404)
         .json({ message: `scheme_id ${req.params.id} id li şema bulunamadı` });
+    } else {
+      next();
     }
   } catch (error) {}
   next();
@@ -31,10 +34,10 @@ const checkSchemeId = async (req, res, next) => {
 const validateScheme = (req, res, next) => {
   const name = req.body.scheme_name;
   try {
-    if (name) {
-      req.scheme_name = name;
-    } else {
+    if (!name || name == "" || typeof name !== "string") {
       res.status(400).json({ message: "Geçersiz scheme_name" });
+    } else {
+      req.scheme_name = name;
     }
   } catch (error) {}
   next();

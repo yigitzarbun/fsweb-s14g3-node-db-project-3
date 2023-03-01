@@ -30,28 +30,31 @@ function find() {
 }
 
 async function findById(scheme_id) {
-  const scheme = await db
-    .select("schemes.*", "steps.*")
-    .from("schemes")
+  const scheme = await db("schemes")
     .leftJoin("steps", "schemes.scheme_id", "steps.scheme_id")
-    .where("schemes.scheme_id", db.raw(scheme_id))
+    .select("schemes.*", "steps.*")
+    .where("schemes.scheme_id", scheme_id)
     .orderBy("steps.step_number");
 
   const name = scheme[0].scheme_name;
-  const steps = [];
-  scheme.forEach((sc) =>
-    steps.push({
-      step_id: sc.step_id,
-      step_number: sc.step_number,
-      instructions: sc.instructions,
-    })
-  );
 
   const result = {
-    scheme_id: scheme_id,
+    scheme_id: parseInt(scheme_id),
     scheme_name: name,
-    steps: steps,
+    steps: [],
   };
+
+  if (scheme[0].scheme_id == null) {
+    result.steps = [];
+  } else {
+    scheme.forEach((sc) =>
+      result.steps.push({
+        step_id: sc.step_id,
+        step_number: sc.step_number,
+        instructions: sc.instructions,
+      })
+    );
+  }
 
   return result;
 
@@ -154,16 +157,20 @@ async function findSteps(scheme_id) {
 
   const name = scheme[0].scheme_name;
 
-  const steps = [];
+  let steps = [];
 
-  scheme.forEach((sc) =>
-    steps.push({
-      step_id: sc.step_id,
-      step_number: sc.step_number,
-      instructions: sc.instructions,
-      scheme_name: name,
-    })
-  );
+  if (scheme[0].scheme_id == null) {
+    steps = [];
+  } else {
+    scheme.forEach((sc) =>
+      steps.push({
+        step_id: sc.step_id,
+        step_number: sc.step_number,
+        instructions: sc.instructions,
+        scheme_name: name,
+      })
+    );
+  }
 
   const sortedSteps = steps.sort((a, b) => {
     return a.step_number - b.step_number;
