@@ -190,13 +190,15 @@ function add(scheme) {
     });
 }
 
-function addStep(scheme_id, step) {
+async function addStep(scheme_id, step) {
   // EXERCISE E
   /*
     1E- Bu işlev, verilen 'scheme_id' ile şemaya bir adım ekler.
     ve verilen "scheme_id"ye ait _tüm adımları_ çözer,
     yeni oluşturulan dahil.
   */
+  await db("steps").insert({ ...step, scheme_id });
+  return await findSteps(scheme_id);
 }
 
 module.exports = {

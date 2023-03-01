@@ -10,16 +10,26 @@ const db = require("./../../data/db-config");
 */
 const checkSchemeId = async (req, res, next) => {
   try {
-    const isExist = await schemeModel.findById(req.params.id);
-    //const exist = db("schemes").where("scheme_id", req.params.id).first();
-    if (isExist == null) {
-      res
-        .status(404)
-        .json({ message: `scheme_id ${req.params.id} id li şema bulunamadı` });
+    const isExist = await schemeModel.findById(req.params.scheme_id);
+    /*const exist = db("schemes")
+      .where("scheme_id", req.params.scheme_id)
+      .first();*/
+    console.log(isExist.scheme_id);
+    if (isExist.scheme_id) {
+      console.log("if'e girdi");
+      /* res.status(404).json({
+        message: `scheme_id ${req.params.scheme_id} id li şema bulunamadı`,
+      });*/
     } else {
+      console.log("else'e girdi");
       next();
     }
-  } catch (error) {}
+  } catch (error) {
+    res
+      .status(404)
+      .json({ message: `scheme_id ${req.params.id} id li şema bulunamadı` });
+  }
+  console.log("catch'e girdi");
   next();
 };
 
@@ -52,7 +62,26 @@ const validateScheme = (req, res, next) => {
     "message": "Hatalı step"
   }
 */
-const validateStep = (req, res, next) => {};
+const validateStep = (req, res, next) => {
+  const instructions = req.body.instructions;
+  const step_number = req.body.step_number;
+
+  try {
+    if (
+      !instructions ||
+      instructions == "" ||
+      typeof instructions !== "string" ||
+      typeof step_number !== "number" ||
+      step_number < 1
+    ) {
+      res.status(400).json({ message: "Hatalı step" });
+    } else {
+      next();
+    }
+  } catch (error) {
+    next();
+  }
+};
 
 module.exports = {
   checkSchemeId,
